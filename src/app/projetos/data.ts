@@ -89,6 +89,56 @@ export const projects = [
       upload: "https://rag-faq-bot-tau.vercel.app/upload",
     },
   },
+  {
+    slug: "venus",
+    titulo: "Vênus - barbershop site",
+    status: "em-desenvolvimento",
+    resumo: "Landing page leve com SEO e captação de leads (formulários/CTA).",
+    tags: ["Next.js", "React", "Tailwind", "Vercel"],
+    highlights: [
+      "Páginas estáticas rápidas e bem pontuadas em SEO.",
+      "Seções modulares (hero, sobre, serviços, contato).",
+      "Formulário de contato integrado e rastreio de conversão.",
+    ],
+    objetivos: [
+      "Publicar presença digital rápida com boa performance.",
+      "Gerar leads via formulário e CTAs estratégicos.",
+    ],
+    timeline: [
+      { fase: "Planejamento", detalhe: "Arquitetura de seções e copy base." },
+      { fase: "Implementação", detalhe: "Next.js + Tailwind + SEO técnico." },
+      { fase: "Ajustes", detalhe: "Iterações de layout e conteúdo." },
+    ],
+    links: {
+      github: "https://github.com/Luizbragga/venus-site",
+      demo: "#",
+    },
+  },
+  {
+    slug: "mealshift",
+    titulo: "MealShift — hábitos e lembretes de refeições",
+    status: "em-desenvolvimento",
+    resumo:
+      "Planner de refeições com lembretes e rotina semanal personalizável.",
+    tags: ["React", "TypeScript", "Vite"],
+    highlights: [
+      "Template semanal de lembretes (manhã/tarde/noite).",
+      "CRUD de lembretes com armazenamento local.",
+      "Base para notificações e histórico.",
+    ],
+    objetivos: [
+      "Ajudar a manter consistência nos horários de refeição.",
+      "Permitir ajustes rápidos no template semanal.",
+    ],
+    timeline: [
+      { fase: "MVP", detalhe: "Lista de lembretes e template semanal." },
+      { fase: "Iteração", detalhe: "Filtros e melhorias de UX." },
+    ],
+    links: {
+      github: "https://github.com/Luizbragga/mealshift",
+      demo: "#",
+    },
+  },
 ];
 
 export type Project = (typeof projects)[number];

@@ -4,39 +4,46 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Reveal from "../components/Reveal";
 import Link from "next/link";
 import { projects } from "./projetos/data";
+import Image from "next/image";
+import ContactForm from "@/components/ContactForm";
 
 /* ===== Botão “magnético” com variants + shine ===== */
-/* ===== Botão “magnético” com variants + shine (fix siblings) ===== */
+type MBProps = {
+  href: string;
+  children: React.ReactNode;
+  external?: boolean;
+  className?: string;
+  variant?: "solid" | "outline" | "ghost";
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
 function MagneticButton({
   href,
   children,
   external,
   className = "",
   variant = "outline",
-}: {
-  href: string;
-  children: React.ReactNode;
-  external?: boolean;
-  className?: string;
-  variant?: "solid" | "outline";
-}) {
+  onClick,
+  ...rest
+}: MBProps) {
   const innerRef = useRef<HTMLSpanElement>(null);
-  const strength = 6; // quanto desloca (px). ajuste se quiser +/-
+  const strength = 6;
 
-  const base =
-    "shine-btn inline-flex items-center justify-center rounded-xl px-5 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-zinc-400/40 dark:focus:ring-white/30";
-  const styles =
+  const variantClass =
     variant === "solid"
-      ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
-      : "border border-zinc-300 hover:bg-black/5 dark:border-zinc-700 dark:hover:bg-white/5";
+      ? "btn-primary"
+      : variant === "ghost"
+      ? "btn-ghost"
+      : "btn";
 
   return (
     <a
       href={href}
+      onClick={onClick} // <<<<<<<<<<<<<<<<<<<<<<  IMPORTANTE
+      {...rest} // (permite aria-label, etc.)
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer" : undefined}
-      className={`${base} ${styles} ${className}`}
-      // o link NÃO se move; só o conteúdo interno
+      className={`shine-btn ${variantClass} ${className}`}
       onMouseMove={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
         const x = ((e.clientX - r.left) / r.width - 0.5) * strength;
@@ -170,6 +177,25 @@ export default function Home() {
   const m2 = useRef<HTMLSpanElement>(null);
   useCountUp(m1, 5, 900);
   useCountUp(m2, 2, 900);
+  const to = "luizbraga.ti@gmail.com";
+  const subject = encodeURIComponent("Contato — Portfólio Henrique Braga");
+  const body = encodeURIComponent(
+    "Oi Henrique, vi seu portfólio e gostaria de conversar sobre...\n\n— Meu nome:\n— Empresa (opcional):\n— Como prefere contato:"
+  );
+  const [openContact, setOpenContact] = useState(false);
+  const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+  const gmail = `https://mail.google.com/mail/?view=cm&to=${to}&su=${subject}&body=${body}`;
+
+  function handleEmailClick(e?: React.MouseEvent) {
+    e?.preventDefault();
+    const before = document.visibilityState;
+    window.location.href = mailto;
+    setTimeout(() => {
+      if (document.visibilityState === "visible" && before === "visible") {
+        window.open(gmail, "_blank", "noopener,noreferrer");
+      }
+    }, 900);
+  }
 
   return (
     <main className="relative min-h-screen grain bg-grid">
@@ -218,10 +244,13 @@ export default function Home() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <MagneticButton href="#projetos">Ver projetos</MagneticButton>
-              <MagneticButton href="https://github.com/" external>
+              <MagneticButton href="https://github.com/Luizbragga" external>
                 GitHub
               </MagneticButton>
-              <MagneticButton href="https://www.linkedin.com/" external>
+              <MagneticButton
+                href="https://www.linkedin.com/in/luiz-henrique-333214287/"
+                external
+              >
                 LinkedIn
               </MagneticButton>
               <MagneticButton href="/HenriqueBraga-CV.pdf">
@@ -243,48 +272,48 @@ export default function Home() {
         </Reveal>
 
         {/* MÉTRICAS */}
-        {/* MÉTRICAS */}
         <section
-          aria-label="Métricas"
-          className="grid grid-cols-2 gap-4 sm:grid-cols-4"
+          aria-label="Status"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-4"
         >
-          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 text-center transition hover:bg-black/5 dark:hover:bg-white/5">
-            <div className="text-2xl font-semibold">
-              <span ref={m1} className="countup">
-                3
-              </span>
-              +
-            </div>
-            <div className="opacity-70 text-sm">projetos entregues</div>
+          {/* 1. Projetos em andamento (dinâmico a partir de ./projetos/data) */}
+          <div className="card p-4 text-center transition hover:-translate-y-0.5">
+            <div className="text-2xl font-semibold">{projects.length}</div>
+            <div className="opacity-70 text-sm">projetos em andamento</div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 text-center transition hover:bg-black/5 dark:hover:bg-white/5">
-            <div className="text-2xl font-semibold">
-              <span ref={m2} className="countup">
-                2
-              </span>
-            </div>
-            <div className="opacity-70 text-sm">sistemas ativos (mantidos)</div>
+          {/* 2. Foco de stack (sem parecer métrica falsa) */}
+          <div className="card p-4 text-center transition hover:-translate-y-0.5">
+            <div className="text-2xl font-semibold">Node.js + React</div>
+            <div className="opacity-70 text-sm">stack principal</div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 text-center transition hover:bg-black/5 dark:hover:bg-white/5">
-            <div className="text-2xl font-semibold">99,9%</div>
+          {/* 3. Meta transparente (em vez de uptime/latência) */}
+          <Link
+            href="/provas"
+            aria-label="Ver estudos de caso"
+            className="card card-clickable p-4 text-center"
+          >
+            <div className="text-2xl font-semibold">3</div>
             <div className="opacity-70 text-sm">
-              <abbr title="Tempo que as APIs ficaram no ar no mês. 99,9% ≈ 43 min fora do ar.">
-                uptime (APIs)
-              </abbr>
+              estudos de caso públicos (meta)
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 text-center transition hover:bg-black/5 dark:hover:bg-white/5">
-            <div className="text-2xl font-semibold">&lt;200ms</div>
-            <div className="opacity-70 text-sm">
-              <abbr title="Tempo médio para a API responder. Quanto menor, melhor.">
-                latência média da API
-              </abbr>
-            </div>
-          </div>
+          </Link>
         </section>
+
+        {/* Observação curta e honesta */}
+        <p className="mt-3 text-sm opacity-70">
+          Estou publicando meus projetos e estudos de caso à medida que avanço.
+          Se quiser ver algo específico,
+          <a
+            href="#contato"
+            className="underline underline-offset-2 hover:opacity-100"
+          >
+            {" "}
+            fale comigo
+          </a>
+          .
+        </p>
 
         {/* PROJETOS */}
         <section id="projetos" className="space-y-6 scroll-mt-24 mt-16">
@@ -351,7 +380,7 @@ export default function Home() {
                 </div>
 
                 <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                  RAG FAQ – Chatbot com RAG
+                  RAG FAQ - Chatbot com RAG
                 </h3>
 
                 <p className="mt-2 text-zinc-600 dark:text-zinc-300">
@@ -405,6 +434,104 @@ export default function Home() {
                 </div>
               </SpotlightCard>
             </Reveal>
+            {/* Vênus - barbershop site */}
+            <Reveal>
+              <SpotlightCard>
+                <div className="flex items-center gap-2 mb-2">
+                  <span
+                    className="rounded-full border px-2.5 py-1 text-xs
+        text-zinc-700 dark:text-zinc-200 bg-white/70 dark:bg-white/10
+        border-zinc-300 dark:border-white/20"
+                  >
+                    Em andamento
+                  </span>
+                </div>
+
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                  Vênus - barbershop site
+                </h3>
+                <p className="mt-2 text-zinc-800 dark:text-zinc-300">
+                  Landing page leve, SEO e captação de leads (CTA/formulários).
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {["Next.js", "React", "Tailwind", "Vercel"].map((t) => (
+                    <span
+                      key={t}
+                      className="text-xs rounded-full border px-2 py-1 transition
+          border-zinc-300 dark:border-zinc-700 dark:hover:bg-white/5 hover:bg-black/5"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex items-center gap-3">
+                  <MagneticButton
+                    href="https://github.com/Luizbragga/venus-site"
+                    external
+                  >
+                    Código
+                  </MagneticButton>
+                  <a
+                    href="/projetos/venus"
+                    className="text-sm text-zinc-800 dark:text-zinc-300 hover:opacity-100"
+                  >
+                    → estudo de caso
+                  </a>
+                </div>
+              </SpotlightCard>
+            </Reveal>
+
+            {/* MealShift — hábitos e lembretes */}
+            <Reveal delay={120}>
+              <SpotlightCard>
+                <div className="flex items-center gap-2 mb-2">
+                  <span
+                    className="rounded-full border px-2.5 py-1 text-xs
+        text-zinc-700 dark:text-zinc-200 bg-white/70 dark:bg-white/10
+        border-zinc-300 dark:border-white/20"
+                  >
+                    Em andamento
+                  </span>
+                </div>
+
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                  MealShift - hábitos e lembretes
+                </h3>
+                <p className="mt-2 text-zinc-800 dark:text-zinc-300">
+                  Planner de refeições com lembretes e template semanal
+                  personalizável.
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {["React", "TypeScript", "Vite"].map((t) => (
+                    <span
+                      key={t}
+                      className="text-xs rounded-full border px-2 py-1 transition
+          border-zinc-300 dark:border-zinc-700 dark:hover:bg-white/5 hover:bg-black/5"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex items-center gap-3">
+                  <MagneticButton
+                    href="https://github.com/Luizbragga/mealshift"
+                    external
+                  >
+                    Código
+                  </MagneticButton>
+                  <a
+                    href="/projetos/mealshift"
+                    className="text-sm text-zinc-800 dark:text-zinc-300 hover:opacity-100"
+                  >
+                    → estudo de caso
+                  </a>
+                </div>
+              </SpotlightCard>
+            </Reveal>
 
             <Reveal delay={120}>
               <SpotlightCard>
@@ -453,7 +580,16 @@ export default function Home() {
 
           <div className="mt-6 grid grid-cols-1 items-start gap-6 md:grid-cols-[160px_1fr]">
             <div className="flex h-32 w-32 select-none items-center justify-center rounded-full bg-white/10 text-3xl font-semibold ring-1 ring-white/15 transition hover:shadow-xl hover:shadow-cyan-400/10 dark:bg-white/5">
-              HB
+              <div className="relative h-32 w-32 overflow-hidden rounded-full ring-1 ring-zinc-200 dark:ring-zinc-800">
+                <Image
+                  src="/perfil/henrique.jpg" // ou .webp se usar webp
+                  alt="Henrique Braga"
+                  fill
+                  sizes="128px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
             </div>
 
             <div>
@@ -497,14 +633,12 @@ export default function Home() {
         {/* CONTATO */}
         <section id="contato" className="mt-24 scroll-mt-24">
           <h2 className="text-2xl font-semibold">Contato</h2>
-          <p className="mt-4 max-w-2xl opacity-90">
+          <p className="mt-4 max-w-2xl text-zinc-800 dark:text-zinc-300">
             Curtiu meu trabalho? Vamos conversar. Respondo rápido por e-mail e
             LinkedIn.
           </p>
+
           <div className="mt-6 flex flex-wrap gap-3">
-            <MagneticButton href="mailto:luizbraga.ti@gmail.com">
-              Enviar e-mail
-            </MagneticButton>
             <MagneticButton href="https://www.linkedin.com/" external>
               LinkedIn
             </MagneticButton>
@@ -517,9 +651,30 @@ export default function Home() {
             <MagneticButton href="/HenriqueBraga-CV.html" external>
               Ver CV online
             </MagneticButton>
-            <MagneticButton href="mailto:henrique@email.com">
+
+            {/* Botão que abre/fecha o formulário */}
+            <MagneticButton
+              href="#contato"
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenContact((v) => !v);
+              }}
+            >
               Fale comigo
             </MagneticButton>
+          </div>
+
+          {/* Formulário: escondido até clicar */}
+          <div
+            id="contact-form"
+            className={`transition-all duration-300 ${
+              openContact
+                ? "mt-6 opacity-100"
+                : "mt-0 opacity-0 pointer-events-none h-0 overflow-hidden"
+            }`}
+            aria-hidden={!openContact}
+          >
+            <ContactForm />
           </div>
         </section>
 

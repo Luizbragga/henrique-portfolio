@@ -1,24 +1,55 @@
 @import "tailwindcss";
 
-/* ===== Paleta & estados claro/escuro ===== */
 :root {
-  --brand1: #22d3ee; /* cyan-400 */
-  --brand2: #a78bfa; /* violet-400 */
-  --brand3: #f472b6; /* pink-400 */
+  /* Brand */
+  --brand1: #22d3ee;
+  --brand2: #a78bfa;
+  --brand3: #f472b6;
 
-  /* LIGHT THEME: linhas e vinheta sutis */
+  /* Base de UI */
+  --bg: #f6f7f8;
+  --fg: #0b0b0c;
+  --muted: #52525b;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --ring: #111827;
+
+  /* LIGHT THEME: linhas e vinheta sutis do seu grid */
   --grid1: rgba(0, 0, 0, 0.06);
   --grid2: rgba(0, 0, 0, 0.03);
   --vignette: rgba(0, 0, 0, 0.1);
+
+  /* overlay translúcido p/ headers fixos, etc. */
+  --overlay: rgba(255, 255, 255, 0.88);
+
+  --accent: #4f46e5;
+  --accent-contrast: #ffffff;
 }
+
 .dark:root {
-  /* DARK THEME */
+  /* Base de UI no DARK (mantendo visual atual) */
+  --bg: #0b0c0f;
+  --fg: #f5f6f7;
+  --muted: #a1a1aa;
+  --card: #0f1115;
+  --border: #27272a;
+  --ring: #93c5fd;
+
+  /* Grid no dark */
   --grid1: rgba(255, 255, 255, 0.06);
   --grid2: rgba(255, 255, 255, 0.035);
   --vignette: rgba(0, 0, 0, 0.25);
+
+  --overlay: rgba(17, 17, 19, 0.55);
 }
 
-/* ===== Grid de fundo com vinheta que respeita o tema ===== */
+/* Aplica base imediatamente */
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
 .bg-grid {
   background-image: linear-gradient(to right, var(--grid2) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid2) 1px, transparent 1px),
@@ -30,7 +61,6 @@
   background-size: 36px 36px, 36px 36px, auto;
 }
 
-/* ===== Título com gradiente animado ===== */
 .title-aurora {
   background: conic-gradient(
     from 180deg at 50% 50%,
@@ -45,9 +75,10 @@
   color: transparent;
   animation: titleShift 12s ease infinite;
 
-  /* glow global (o LIGHT será sobrescrito abaixo) */
+  /* glow global (no LIGHT será suavizado abaixo) */
   filter: drop-shadow(0 4px 18px rgba(255, 255, 255, 0.15));
 }
+
 @keyframes titleShift {
   0% {
     background-position: 0% 50%;
@@ -60,7 +91,6 @@
   }
 }
 
-/* ===== Borda gradiente (fix vazar) ===== */
 .gradient-border {
   position: relative;
   border-radius: 1rem;
@@ -87,13 +117,16 @@
   animation: spin 14s linear infinite;
   opacity: 0.75;
 }
+
 @keyframes spin {
   to {
     transform: rotate(1turn);
   }
 }
 
-/* ===== Brilho varrendo no hover dos botões ===== */
+/* =========================================================
+   Brilho varrendo no hover dos botões
+   ========================================================= */
 .shine-btn {
   position: relative;
   overflow: hidden;
@@ -115,7 +148,9 @@
   transform: translateX(120%) rotate(12deg);
 }
 
-/* ===== Reveal on scroll ===== */
+/* =========================================================
+   Reveal on scroll
+   ========================================================= */
 .reveal {
   opacity: 0;
   transform: translateY(10px) scale(0.985);
@@ -127,19 +162,12 @@
   transform: none;
 }
 
-/* =========================================================
-   OVERRIDES — SOMENTE NO TEMA CLARO
-   Objetivo: reduzir o “estouro” de luz do hero (círculo)
-   sem afetar o tema escuro.
-   ========================================================= */
-
-/* 1) Título: tira o glow branco e usa sombra bem discreta escura */
+/* 1) Título: tira o glow branco e usa sombra escura bem discreta */
 :root:not(.dark) .title-aurora {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06)) !important;
 }
 
-/* 2) Vinheta do fundo: empurra a borda escura mais pra fora e suaviza.
-      Isso reduz o contraste no centro (a tal “luz”). */
+/* 2) Vinheta do fundo: empurra a borda escura mais pra fora e suaviza */
 :root:not(.dark) .bg-grid {
   background-image: linear-gradient(to right, var(--grid2) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid2) 1px, transparent 1px),
@@ -150,31 +178,86 @@
     );
 }
 
-/* =========================================================
-   OVERRIDES — SOMENTE NO TEMA CLARO
-   Objetivo: reduzir o “estouro” de luz do hero (círculo)
-   sem afetar o tema escuro.
-   ========================================================= */
+@layer components {
+  /* botão base (secundário) */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium
+           border transition-colors
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)];
+    background: var(--card);
+    color: var(--fg);
+    border-color: var(--border);
+  }
+  .btn:hover {
+    @apply bg-zinc-50;
+  }
 
-/* 1) Título: tira o glow branco e usa sombra bem discreta escura */
-:root:not(.dark) .title-aurora {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06)) !important;
-}
+  /* primário (CTA): neutro por padrão, azul só no hover/foco */
+  .btn-primary:hover,
+  .btn-primary:focus-visible {
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border-color: transparent;
+    filter: none;
+  }
 
-/* 2) Vinheta do fundo (bg-grid): empurra a borda escura mais pra fora e suaviza.
-      Isso reduz o contraste no centro (a tal “luz”). */
-:root:not(.dark) .bg-grid {
-  background-image: linear-gradient(to right, var(--grid2) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid2) 1px, transparent 1px),
-    radial-gradient(
-      ellipse 55% 38% at 50% -12%,
-      transparent 68%,
-      rgba(0, 0, 0, 0.06) 86%
-    );
-}
+  .btn:hover,
+  .btn:focus-visible {
+    background: var(--accent, #4f46e5);
+    color: var(--accent-contrast, #fff);
+    border-color: transparent;
+  }
 
-*/ :root:not(.dark) {
-  --brand1: #a1a1aa; /* ≈ zinc-400 */
-  --brand2: #a1a1aa;
-  --brand3: #a1a1aa;
+  .btn-primary:hover {
+    filter: brightness(0.95);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium border;
+    background: transparent;
+    color: var(--fg);
+    border-color: var(--border);
+  }
+  .btn-ghost:hover,
+  .btn-ghost:focus-visible {
+    background: var(--accent, #4f46e5);
+    color: var(--accent-contrast, #fff);
+    border-color: transparent;
+  }
+
+  /* cartões/boxes */
+  .card {
+    @apply rounded-2xl border shadow-sm;
+    background: var(--card);
+    border-color: var(--border);
+  }
+  .card-clickable {
+    @apply relative cursor-pointer transition;
+  }
+  /* leve “tinta” e borda de acento no hover/foco */
+  .card-clickable:hover,
+  .card-clickable:focus-visible {
+    box-shadow: inset 0 0 0 1px var(--accent), 0 10px 24px rgba(0, 0, 0, 0.06);
+  }
+  /* setinha decorativa à direita no hover */
+  .card-clickable::after {
+    content: "→";
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .card-clickable:hover::after,
+  .card-clickable:focus-visible::after {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .shine-btn::after {
+    pointer-events: none;
+  }
 }
