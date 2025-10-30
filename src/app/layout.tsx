@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "../components/ThemeProvider";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { NavBar } from "@/components/NavBar";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,25 +31,29 @@ export default function RootLayout({
             }}
           >
             <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-              <a href="/" className="font-semibold tracking-tight">
+              <Link href="/" className="font-semibold tracking-tight">
                 Henrique Braga
-              </a>
+              </Link>
+
               <div className="flex items-center gap-5 text-sm">
-                <a href="/#projetos" className="hover:opacity-80 transition">
+                <Link href="/#projetos" className="hover:opacity-80 transition">
                   Projetos
-                </a>
-                <a href="/#sobre" className="hover:opacity-80 transition">
+                </Link>
+                <Link href="/#sobre" className="hover:opacity-80 transition">
                   Sobre
-                </a>
-                <a href="/#contato" className="hover:opacity-80 transition">
+                </Link>
+                <Link href="/#contato" className="hover:opacity-80 transition">
                   Contato
-                </a>
+                </Link>
+
+                {/* arquivo estático pode continuar como <a> */}
                 <a
                   href="/HenriqueBraga-CV.pdf"
                   className="rounded-xl border border-zinc-300 px-3 py-1.5 hover:bg-black/5 dark:border-zinc-700 dark:hover:bg-white/5 transition"
                 >
                   Baixar CV
                 </a>
+
                 <ThemeToggle />
               </div>
             </nav>

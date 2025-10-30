@@ -39,8 +39,8 @@ function MagneticButton({
   return (
     <a
       href={href}
-      onClick={onClick} // <<<<<<<<<<<<<<<<<<<<<<  IMPORTANTE
-      {...rest} // (permite aria-label, etc.)
+      onClick={onClick}
+      {...rest}
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer" : undefined}
       className={`shine-btn ${variantClass} ${className}`}
@@ -78,16 +78,20 @@ function useCountUp<T extends HTMLElement>(
     const el = ref.current;
     if (!el) return;
 
-    let start = 0,
-      startTs = 0,
-      raf = 0;
+    let start = 0;
+    let startTs = 0;
+    let raf = 0;
+
     const step = (ts: number) => {
       if (!startTs) startTs = ts;
       const p = Math.min((ts - startTs) / dur, 1);
       const val = Math.floor(p * (end - start) + start);
       el.textContent = String(val);
-      if (p < 1) raf = requestAnimationFrame(step);
+      if (p < 1) {
+        raf = requestAnimationFrame(step);
+      }
     };
+
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [ref, end, dur]);
@@ -177,25 +181,8 @@ export default function Home() {
   const m2 = useRef<HTMLSpanElement>(null);
   useCountUp(m1, 5, 900);
   useCountUp(m2, 2, 900);
-  const to = "luizbraga.ti@gmail.com";
-  const subject = encodeURIComponent("Contato — Portfólio Henrique Braga");
-  const body = encodeURIComponent(
-    "Oi Henrique, vi seu portfólio e gostaria de conversar sobre...\n\n— Meu nome:\n— Empresa (opcional):\n— Como prefere contato:"
-  );
-  const [openContact, setOpenContact] = useState(false);
-  const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
-  const gmail = `https://mail.google.com/mail/?view=cm&to=${to}&su=${subject}&body=${body}`;
 
-  function handleEmailClick(e?: React.MouseEvent) {
-    e?.preventDefault();
-    const before = document.visibilityState;
-    window.location.href = mailto;
-    setTimeout(() => {
-      if (document.visibilityState === "visible" && before === "visible") {
-        window.open(gmail, "_blank", "noopener,noreferrer");
-      }
-    }, 900);
-  }
+  const [openContact, setOpenContact] = useState(false);
 
   return (
     <main className="relative min-h-screen grain bg-grid">
@@ -221,7 +208,6 @@ export default function Home() {
   dark:mix-blend-screen dark:opacity-100"
       />
 
-      {/* se você usa uma aurora própria, mantém */}
       <div className="aurora" />
 
       <div className="relative z-[1] mx-auto max-w-5xl px-6 py-24">
@@ -276,19 +262,16 @@ export default function Home() {
           aria-label="Status"
           className="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-4"
         >
-          {/* 1. Projetos em andamento (dinâmico a partir de ./projetos/data) */}
           <div className="card p-4 text-center transition hover:-translate-y-0.5">
             <div className="text-2xl font-semibold">{projects.length}</div>
             <div className="opacity-70 text-sm">projetos em andamento</div>
           </div>
 
-          {/* 2. Foco de stack (sem parecer métrica falsa) */}
           <div className="card p-4 text-center transition hover:-translate-y-0.5">
             <div className="text-2xl font-semibold">Node.js + React</div>
             <div className="opacity-70 text-sm">stack principal</div>
           </div>
 
-          {/* 3. Meta transparente (em vez de uptime/latência) */}
           <Link
             href="/provas"
             aria-label="Ver estudos de caso"
@@ -357,12 +340,12 @@ export default function Home() {
                   >
                     Código
                   </MagneticButton>
-                  <a
+                  <Link
                     href="/projetos/padarias"
                     className="text-sm text-zinc-800 dark:text-zinc-300 hover:opacity-100"
                   >
                     → estudo de caso
-                  </a>
+                  </Link>
                 </div>
               </SpotlightCard>
             </Reveal>
@@ -411,12 +394,12 @@ export default function Home() {
                   >
                     Demo
                   </MagneticButton>
-                  <a
+                  <Link
                     href="/projetos/rag-faq"
                     className="text-sm text-zinc-700 dark:text-zinc-300 hover:opacity-100"
                   >
                     → estudo de caso
-                  </a>
+                  </Link>
                   <a
                     href="https://rag-faq-bot-tau.vercel.app/chat"
                     target="_blank"
@@ -434,6 +417,7 @@ export default function Home() {
                 </div>
               </SpotlightCard>
             </Reveal>
+
             {/* Vênus - barbershop site */}
             <Reveal>
               <SpotlightCard>
@@ -473,12 +457,12 @@ export default function Home() {
                   >
                     Código
                   </MagneticButton>
-                  <a
+                  <Link
                     href="/projetos/venus"
                     className="text-sm text-zinc-800 dark:text-zinc-300 hover:opacity-100"
                   >
                     → estudo de caso
-                  </a>
+                  </Link>
                 </div>
               </SpotlightCard>
             </Reveal>
@@ -523,12 +507,12 @@ export default function Home() {
                   >
                     Código
                   </MagneticButton>
-                  <a
+                  <Link
                     href="/projetos/mealshift"
                     className="text-sm text-zinc-800 dark:text-zinc-300 hover:opacity-100"
                   >
                     → estudo de caso
-                  </a>
+                  </Link>
                 </div>
               </SpotlightCard>
             </Reveal>
@@ -562,12 +546,12 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="mt-4">
-                  <a
+                  <Link
                     href="/projetos/proximo"
                     className="text-sm text-zinc-800 dark:text-zinc-300 hover:opacity-100"
                   >
                     → estudo de caso
-                  </a>
+                  </Link>
                 </div>
               </SpotlightCard>
             </Reveal>
@@ -582,7 +566,7 @@ export default function Home() {
             <div className="flex h-32 w-32 select-none items-center justify-center rounded-full bg-white/10 text-3xl font-semibold ring-1 ring-white/15 transition hover:shadow-xl hover:shadow-cyan-400/10 dark:bg-white/5">
               <div className="relative h-32 w-32 overflow-hidden rounded-full ring-1 ring-zinc-200 dark:ring-zinc-800">
                 <Image
-                  src="/perfil/henrique.jpg" // ou .webp se usar webp
+                  src="/perfil/henrique.jpg"
                   alt="Henrique Braga"
                   fill
                   sizes="128px"
@@ -660,7 +644,7 @@ export default function Home() {
                 setOpenContact((v) => !v);
               }}
             >
-              Fale comigo
+              {openContact ? "Fechar" : "Fale comigo"}
             </MagneticButton>
           </div>
 
