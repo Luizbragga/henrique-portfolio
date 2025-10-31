@@ -78,7 +78,7 @@ function useCountUp<T extends HTMLElement>(
     const el = ref.current;
     if (!el) return;
 
-    let start = 0;
+    const start = 0;
     let startTs = 0;
     let raf = 0;
 
@@ -87,9 +87,7 @@ function useCountUp<T extends HTMLElement>(
       const p = Math.min((ts - startTs) / dur, 1);
       const val = Math.floor(p * (end - start) + start);
       el.textContent = String(val);
-      if (p < 1) {
-        raf = requestAnimationFrame(step);
-      }
+      if (p < 1) raf = requestAnimationFrame(step);
     };
 
     raf = requestAnimationFrame(step);
