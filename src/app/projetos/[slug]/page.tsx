@@ -1,30 +1,13 @@
-import type { Metadata } from "next";
-import { getProject, projects } from "../data";
+import { getProject } from "../data";
 
-// força build estático deste segmento
-export const dynamic = "force-static";
-
-// gera as rotas estáticas (corrige a inferência de tipos do params)
-export async function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
-}
-
-// SEO por projeto
-export async function generateMetadata({
+// Next 15: params pode ser Promise. Faça a page async e "await params".
+export default async function ProjectPage({
   params,
 }: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const project = getProject(params.slug);
-  const title = project
-    ? `${project.titulo} — Henrique Braga`
-    : "Projeto não encontrado";
-  const description = project?.resumo ?? "Detalhes do projeto.";
-  return { title, description };
-}
-
-export default function ProjectPage({ params }: { params: { slug: string } }) {
-  const project = getProject(params.slug);
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const project = getProject(slug);
 
   if (!project) {
     return (
@@ -34,7 +17,7 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
     );
   }
 
-  // alias só para facilitar o acesso aos links opcionais
+  // Alias para campos opcionais (chat/upload)
   const l = project.links as Record<string, string | undefined>;
 
   return (
