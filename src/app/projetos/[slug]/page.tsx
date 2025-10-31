@@ -1,4 +1,27 @@
-import { getProject } from "../data";
+import type { Metadata } from "next";
+import { getProject, projects } from "../data";
+
+// força build estático deste segmento
+export const dynamic = "force-static";
+
+// gera as rotas estáticas (corrige a inferência de tipos do params)
+export async function generateStaticParams() {
+  return projects.map((p) => ({ slug: p.slug }));
+}
+
+// SEO por projeto
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const project = getProject(params.slug);
+  const title = project
+    ? `${project.titulo} — Henrique Braga`
+    : "Projeto não encontrado";
+  const description = project?.resumo ?? "Detalhes do projeto.";
+  return { title, description };
+}
 
 export default function ProjectPage({ params }: { params: { slug: string } }) {
   const project = getProject(params.slug);
@@ -11,7 +34,7 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
     );
   }
 
-  // Alias para evitar TS chato quando adicionamos campos opcionais (chat/upload)
+  // alias só para facilitar o acesso aos links opcionais
   const l = project.links as Record<string, string | undefined>;
 
   return (
@@ -44,7 +67,6 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
         )}
       </ul>
 
-      {/* Botões com contraste corrigido */}
       <div className="mt-10 flex flex-wrap gap-3">
         {l.github && (
           <a
