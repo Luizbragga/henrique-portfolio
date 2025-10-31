@@ -1,23 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+
+type Payload = {
+  name: string;
+  email: string;
+  message: string;
+  company?: string;
+};
 
 export default function ContactForm() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Payload>({
     name: "",
     email: "",
     message: "",
     company: "",
-  }); // company = honeypot
-  const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">(
-    "idle"
-  );
-  const [error, setError] = useState<string | null>(null);
+  });
+  const [loading, setLoading] = useState(false);
+  const [ok, setOk] = useState<null | boolean>(null);
+  const [error, setError] = useState<string>("");
 
-  async function onSubmit(e: React.FormEvent) {
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus("sending");
-    setError(null);
+    setLoading(true);
+    setOk(null);
+    setError("");
 
     try {
       const res = await fetch("/api/contact", {
@@ -25,94 +39,84 @@ export default function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        throw new Error(data?.error || "Falha ao enviar");
+
+      if (!res.ok) {
+        // tenta extrair mensagem de erro da API
+        let msg = "Falha ao enviar a mensagem.";
+        try {
+          const data: { error?: string } = await res.json();
+          if (data?.error) msg = data.error;
+        } catch {
+          /* ignore */
+        }
+        throw new Error(msg);
       }
-      setStatus("ok");
+
+      setOk(true);
       setForm({ name: "", email: "", message: "", company: "" });
-    } catch (err: any) {
-      setStatus("error");
-      setError(err?.message || "Erro desconhecido.");
+    } catch (err) {
+      setOk(false);
+      setError(err instanceof Error ? err.message : "Erro inesperado.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 grid gap-3 max-w-xl">
-      {/* honeypot invisível */}
-      <input
-        type="text"
-        name="company"
-        autoComplete="off"
-        tabIndex={-1}
-        value={form.company}
-        onChange={(e) => setForm({ ...form, company: e.target.value })}
-        className="hidden"
-      />
-
-      <div className="grid gap-1">
-        <label className="text-sm text-zinc-800 dark:text-zinc-200">
-          Seu nome
-        </label>
+    <form onSubmit={onSubmit} className="mt-6 space-y-4 max-w-3xl">
+      <div>
+        <label className="block text-sm mb-1">Seu nome</label>
         <input
-          required
+          name="name"
           value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="rounded-xl border px-3 py-2
-             bg-white/80 dark:bg-white/10
-             border-zinc-300 dark:border-zinc-700
-             text-zinc-900 dark:text-zinc-100
-             placeholder-zinc-600 dark:placeholder-zinc-400"
+          onChange={handleChange}
+          required
+          className="w-full rounded-xl border px-4 py-3 bg-white/70 dark:bg-white/10 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+          placeholder="Ex.: Henrique Braga"
         />
+      </div>
 
-        <label className="text-sm text-zinc-800 dark:text-zinc-200">
-          Seu e-mail
-        </label>
+      <div>
+        <label className="block text-sm mb-1">Seu e-mail</label>
         <input
-          required
           type="email"
+          name="email"
           value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="rounded-xl border px-3 py-2
-             bg-white/80 dark:bg-white/10
-             border-zinc-300 dark:border-zinc-700
-             text-zinc-900 dark:text-zinc-100
-             placeholder-zinc-600 dark:placeholder-zinc-400"
-        />
-
-        <label className="text-sm text-zinc-800 dark:text-zinc-200">
-          Mensagem
-        </label>
-        <textarea
+          onChange={handleChange}
           required
-          rows={5}
+          className="w-full rounded-xl border px-4 py-3 bg-white/70 dark:bg-white/10 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+          placeholder="seuemail@exemplo.com"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">Mensagem</label>
+        <textarea
+          name="message"
           value={form.message}
-          onChange={(e) => setForm({ ...form, message: e.target.value })}
-          className="rounded-xl border px-3 py-2
-             bg-white/80 dark:bg-white/10
-             border-zinc-300 dark:border-zinc-700
-             text-zinc-900 dark:text-zinc-100
-             placeholder-zinc-600 dark:placeholder-zinc-400"
+          onChange={handleChange}
+          required
+          rows={6}
+          className="w-full rounded-xl border px-4 py-3 bg-white/70 dark:bg-white/10 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+          placeholder="Conte em poucas linhas o que você precisa..."
         />
       </div>
 
       <button
         type="submit"
-        disabled={status === "sending"}
-        className="btn-primary shine-btn disabled:opacity-60 disabled:cursor-not-allowed"
+        disabled={loading}
+        className="btn-primary shine-btn min-w-[160px]"
       >
-        {status === "sending" ? "Enviando…" : "Enviar mensagem"}
+        {loading ? "Enviando..." : "Enviar mensagem"}
       </button>
 
-      {status === "ok" && (
+      {ok === true && (
         <p className="text-emerald-500 text-sm">
-          Mensagem enviada com sucesso! Vou responder em breve.
+          Mensagem enviada com sucesso!
         </p>
       )}
-      {status === "error" && (
-        <p className="text-red-500 text-sm">
-          Não foi possível enviar. {error || ""}
-        </p>
+      {ok === false && (
+        <p className="text-red-500 text-sm">{error || "Falha ao enviar."}</p>
       )}
     </form>
   );
